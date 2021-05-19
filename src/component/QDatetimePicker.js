@@ -76,6 +76,14 @@ const { value, clearable, ...props } = {
     type: [ Boolean, String ],
     default: false
   },
+  isLocal: {
+    type: Boolean,
+    default: false
+  },
+  isPartial: {
+    type: Boolean,
+    default: false
+  },
   clearIcon: String,
   autoUpdateValue: Boolean,
   hideTabs: {
@@ -278,9 +286,9 @@ export default function ({ ssrContext }) {
           })
         }
         let current = this.standard === 'quasar' ? this.values.quasar : this.values.iso
-        if (this.standard === 'iso') {
+        if (this.isLocal && this.standard === 'iso') {
           if (this.mode === 'time'){
-            current = current.split('T')[1]
+            current = current.split('T')[1].split('.')[0]
           } else if (this.mode === 'date'){
             current = current.split('T')[0]
           }
@@ -299,7 +307,7 @@ export default function ({ ssrContext }) {
               let today = date.getDefault({ mode: this.mode })
               switch (this.mode) {
                 case 'date': proporsal = proporsal + ' 00:00:00'; break
-                case 'time': proporsal = today.quasar + ' ' + proporsal; break
+                case 'time': proporsal = today.iso + 'T' + proporsal; break
               }
             }
             let parsed = date.parse({ proporsal, withSeconds: this.withSeconds })
@@ -324,7 +332,8 @@ export default function ({ ssrContext }) {
             ampm: this.format24h ? void 0 : this.values.suffix,
             mode: this.mode,
             metas: this.metas,
-            masks: this.masks
+            masks: this.masks,
+            isPartial: this.isPartial
           })
           let parsed = date.parse({ proporsal, withSeconds: this.withSeconds })
           if (parsed.success) {
@@ -345,10 +354,14 @@ export default function ({ ssrContext }) {
         switch (true) {
           case this.mode === 'date':
             this.original.date = this.values.date
+            if (!this.isPartial)
+              this.original.time = '00:00:00'
             this.$refs.popup.hide()
             break
           case this.mode === 'time':
             this.original.time = this.values.time
+            if (!this.isPartial)
+              this.original.date = '1970-01-01'
             this.$refs.popup.hide()
             break
           case this.mode === 'datetime' && this.tab === 'date':

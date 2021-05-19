@@ -175,6 +175,10 @@
       "type": "Boolean",
       "desc": "Allow the time to be set with seconds"
     },
+    "is-local": {
+      "type": "Boolean",
+      "desc": "If not set, the iso value will always include milliseconds and time zone offset, e.g. 2021-05-12T19:21:57.994+0200"
+    },
     "disable-popup": {
       "type": "Boolean",
       "desc": "Removes the 'Picker'(a.k.a popup) of the 'DatetimePicker', turning the component in a 'DatetimeInput'. Ideal if you wanna the user to type the date and/or time."

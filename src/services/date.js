@@ -1,4 +1,4 @@
-export function parse ({ proporsal, withSeconds }) {
+export function parse ({ proporsal }) {
   let padStart = (number, length = 2) => {
     return ('' + number).padStart(length, '0')
   }
@@ -11,19 +11,27 @@ export function parse ({ proporsal, withSeconds }) {
     let hour = padStart(objDate.getHours())
     let minute = padStart(objDate.getMinutes())
     let formatted = `${year}/${month}/${day} ${hour}:${minute}`
-    if (withSeconds) {
-      let second = padStart(objDate.getSeconds())
-      formatted = formatted + `:${second}`
-    }
+
+    // when parsing always add seconds even if with-seconds is not set
+    let second = padStart(objDate.getSeconds())
+    formatted = formatted + `:${second}`
+
     let quasar = formatted
     let iso = quasar.replace(/[/]/g, '-').replace(' ', 'T')
+
+    // always add millis and offset to iso
+    let millis = padStart(objDate.getMilliseconds(), 3)
+    let offset = new Date().toString().match(/([-\+][0-9]+)\s/)[1] // e.g. +0200
+    offset = offset.substr(0,3) + ':' + offset.substr(3,2) // e.g. +02:00
+    iso = iso + `.${millis}${offset}`
+
     return { success: true, quasar, iso }
   }
   return { success: false, quasar: '', iso: '' }
 }
 
 export function getDefault ({ base, mode }) {
-  let meta, quasar, baseDate
+  let meta, quasar, iso, baseDate
   if (mode === 'time') {
     if (base) {
       baseDate = new Date(base)
@@ -45,13 +53,15 @@ export function getDefault ({ base, mode }) {
     meta = { year: '1970', month: '01', day: '01' }
   }
   quasar = `${meta.year}/${meta.month}/${meta.day}`
+  iso = `${meta.year}-${meta.month}-${meta.day}`
   return {
     meta,
-    quasar
+    quasar,
+    iso
   }
 }
 
-export function quasar ({ base, masked, ampm, mode, metas, masks }) {
+export function quasar ({ base, masked, ampm, mode, metas, masks, isPartial }) {
   let today = getDefault({ base, mode })
   let date = today.quasar
   let time = '00:00:00'
@@ -108,7 +118,23 @@ export function quasar ({ base, masked, ampm, mode, metas, masks }) {
     }
     time = `${hour}:${minute}:${second}`
   }
-  return `${date} ${time}`
+  switch (mode) {
+    case 'date':
+      if (isPartial)
+        return `${date} ${time}`
+      else
+        return date + ' 00:00:00'
+      break
+    case 'time':
+      if (isPartial)
+        return `${date} ${time}`
+      else
+        return '1970-01-01 ' + time
+      break
+    default:
+      return `${date} ${time}`
+      break
+  }
 }
 
 export function masked ({ values, metas, masks }) {
@@ -134,7 +160,7 @@ export function masked ({ values, metas, masks }) {
     meta = metas.time
 
     time = values.time
-    time12 = values.time    
+    time12 = values.time
     parts = time.split(':')
     parts12 = time12.split(':')
     array = []
