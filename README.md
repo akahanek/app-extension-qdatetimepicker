@@ -273,7 +273,7 @@ But don't worry, that isn't as bad as seems, this extension already does the mos
 | time-options | Function | Optionally configure what time the user allowed to set |
 | with-seconds | Boolean | Allow the time to be set with seconds |
 | is-local | Boolean | If not set, the iso value will always include milliseconds and time zone offset, e.g. 2021-05-12T19:21:57.994+0200 |
-| is-partial | Boolean | Enables to use 2 different components for editing the same data - one for date ("date" mode set) and another for time ("time" mode set). Both these components should have set the is-partial flag. |
+| is-partial | Boolean | Enables to use 2 different components for editing the same data - one for date ("date" mode set) and another for time ("time" mode set). Both these components should have set the is-partial flag. Setting both IsPartial and IsLocal is not supported. |
 | disable-popup | Boolean | Removes the `Picker`(a.k.a popup) of the `DatetimePicker`, turning the component in a `DatetimeInput`. Ideal if you wanna the user to type the date and/or time. |
 | default-standard | String | serialization standard, the property will be ignored if value isn't null (`iso`, `quasar`) (eg.: `iso`: `yyyy-MM-ddTHH:mm`, `quasar`: `yyyy/MM/dd HH:mm`) (default: `iso`) |
 | auto-update-value | Boolean | When the last action in selection mode is completed, the value is updated automatically |
